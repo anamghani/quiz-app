@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bari Quiz — Test Your Islamic Knowledge</title>
+<style>
+  :root{
+    --bg:#0E3B36;
+    --bg-2:#123F3A;
+    --card:#14453F;
+    --gold:#C9A24B;
+    --cream:#F3EDE1;
+    --muted:#9FB9AE;
+    --good:#5FA98A;
+    --bad:#C56B5A;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100%;
+    background:var(--bg);
+    background-image:
+      linear-gradient(135deg, rgba(201,162,75,0.06) 25%, transparent 25%, transparent 75%, rgba(201,162,75,0.06) 75%),
+      linear-gradient(135deg, rgba(201,162,75,0.06) 25%, transparent 25%, transparent 75%, rgba(201,162,75,0.06) 75%);
+    background-size:48px 48px;
+    background-position:0 0, 24px 24px;
+    color:var(--cream);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:env(safe-area-inset-top,0) 16px env(safe-area-inset-bottom,0);
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+  }
+  .wrap{
+    width:100%;
+    max-width:520px;
+    padding:32px 0 48px;
+  }
+  header.top{
+    text-align:center;
+    margin-bottom:24px;
+  }
+  header.top .mark{
+    width:46px;height:46px;margin:0 auto 10px;
+    border:2px solid var(--gold);
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+  }
+  header.top h1{
+    font-family:Georgia,'Times New Roman',serif;
+    font-weight:600;
+    font-size:26px;
+    margin:0 0 4px;
+    letter-spacing:0.3px;
+  }
+  header.top p{
+    margin:0;
+    color:var(--muted);
+    font-size:14px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid rgba(201,162,75,0.25);
+    border-radius:14px;
+    padding:26px 22px;
+  }
+  .progress{
+    display:flex;
+    gap:6px;
+    margin-bottom:20px;
+  }
+  .progress i{
+    flex:1;
+    height:4px;
+    border-radius:2px;
+    background:rgba(255,255,255,0.12);
+  }
+  .progress i.done{background:var(--gold);}
+  .qnum{
+    color:var(--gold);
+    font-size:13px;
+    margin-bottom:8px;
+  }
+  .qtext{
+    font-family:Georgia,'Times New Roman',serif;
+    font-size:19px;
+    line-height:1.4;
+    margin:0 0 20px;
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .opt{
+    text-align:left;
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.14);
+    color:var(--cream);
+    border-radius:10px;
+    padding:13px 16px;
+    font-size:15px;
+    cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .opt:hover{border-color:var(--gold);}
+  .opt.selected{border-color:var(--gold); background:rgba(201,162,75,0.14);}
+  .opt:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  .nav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:24px;
+  }
+  button.primary{
+    background:var(--gold);
+    color:#1a1a1a;
+    border:none;
+    border-radius:10px;
+    padding:12px 22px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  button.primary:disabled{opacity:0.4; cursor:not-allowed;}
+  button.ghost{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.2);
+    color:var(--cream);
+    border-radius:10px;
+    padding:12px 18px;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .hidden{display:none !important;}
+
+  /* results view */
+  .score-ring{
+    width:150px;height:150px;
+    margin:6px auto 18px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:conic-gradient(var(--gold) calc(var(--pct) * 1%), rgba(255,255,255,0.08) 0);
+  }
+  .score-ring .inner{
+    width:118px;height:118px;
+    border-radius:50%;
+    background:var(--card);
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+  }
+  .score-ring .inner .n{font-family:Georgia,serif;font-size:30px;font-weight:600;}
+  .score-ring .inner .lbl{font-size:12px;color:var(--muted);}
+  .verdict{
+    text-align:center;
+    font-family:Georgia,serif;
+    font-size:20px;
+    margin:0 0 6px;
+  }
+  .subverdict{
+    text-align:center;
+    color:var(--muted);
+    font-size:14px;
+    margin:0 0 24px;
+  }
+  .review{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:24px;
+    max-height:260px;
+    overflow-y:auto;
+  }
+  .review-item{
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:13.5px;
+  }
+  .review-item .rq{color:var(--muted); margin-bottom:4px;}
+  .review-item .ra{color:var(--bad);}
+  .review-item .ra.ok{color:var(--good);}
+  .review-item .rc{color:var(--good);}
+  .share-title{
+    font-size:14px;
+    color:var(--muted);
+    margin:0 0 10px;
+    text-align:center;
+  }
+  .share-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    margin-bottom:18px;
+  }
+  .share-btn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:11px 16px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.16);
+    background:rgba(255,255,255,0.04);
+    color:var(--cream);
+    font-size:14px;
+    text-decoration:none;
+    cursor:pointer;
+  }
+  .share-btn.wa{border-color:#25D366; color:#25D366;}
+  .share-btn.tg{border-color:#54A9EB; color:#54A9EB;}
+  .share-btn.fb{border-color:#4267B2; color:#8fa8db;}
+  .share-btn.x{border-color:#cfcfcf;}
+  .retake{
+    display:block;
+    width:100%;
+    text-align:center;
+    margin-top:6px;
+  }
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    margin-top:22px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="mark">☾</div>
+    <h1>Bari Quiz</h1>
+    <p>A short quiz on Islamic knowledge</p>
+  </header>
+
+  <!-- QUIZ VIEW -->
+  <section id="quizView" class="card">
+    <div class="progress" id="progressBar"></div>
+    <div class="qnum" id="qNum"></div>
+    <p class="qtext" id="qText"></p>
+    <div class="options" id="options"></div>
+    <div class="nav">
+      <button class="ghost" id="skipBtn" type="button">Skip</button>
+      <button class="primary" id="nextBtn" type="button" disabled>Next</button>
+    </div>
+  </section>
+
+  <!-- RESULT VIEW -->
+  <section id="resultView" class="card hidden">
+    <div class="score-ring" id="scoreRing">
+      <div class="inner">
+        <div class="n" id="scoreNum">0/0</div>
+        <div class="lbl">correct</div>
+      </div>
+    </div>
+    <p class="verdict" id="verdictText"></p>
+    <p class="subverdict" id="subverdictText"></p>
+
+    <div class="review" id="reviewList"></div>
+
+    <p class="share-title">Share this quiz</p>
+    <div class="share-row">
+      <a class="share-btn wa" id="shareWA" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="share-btn tg" id="shareTG" target="_blank" rel="noopener">Telegram</a>
+      <a class="share-btn fb" id="shareFB" target="_blank" rel="noopener">Facebook</a>
+      <a class="share-btn x" id="shareX" target="_blank" rel="noopener">X</a>
+      <button class="share-btn" id="shareCopy" type="button">Copy link</button>
+    </div>
+
+    <button class="primary retake" id="retakeBtn" type="button">Take another quiz</button>
+  </section>
+
+  <footer>10 random questions, new order every attempt.<br>Powered by Ghani</footer>
+</div>
+
+<script>
+(function(){
+  var BANK = [
+    {q:"How many pillars of Islam are there?", a:["Four","Five","Six","Seven"], c:1},
+    {q:"What is the Islamic declaration of faith called?", a:["Salah","Zakat","Shahada","Sawm"], c:2},
+    {q:"During which month do Muslims fast?", a:["Shawwal","Muharram","Rajab","Ramadan"], c:3},
+    {q:"How many times a day are Muslims obligated to pray?", a:["Three","Four","Five","Six"], c:2},
+    {q:"What is the pilgrimage to Makkah called?", a:["Umrah","Hajj","Ziyarah","Sawm"], c:1},
+    {q:"What is the holy book of Islam called?", a:["Torah","Bible","Quran","Zabur"], c:2},
+    {q:"In which city was Prophet Muhammad (PBUH) born?", a:["Madinah","Makkah","Jerusalem","Damascus"], c:1},
+    {q:"What is the direction Muslims face during prayer called?", a:["Qiblah","Minbar","Mihrab","Adhan"], c:0},
+    {q:"What is the call to prayer called?", a:["Iqamah","Khutbah","Adhan","Dua"], c:2},
+    {q:"Zakat refers to which act of worship?", a:["Fasting","Charity given yearly","Pilgrimage","Testimony of faith"], c:1},
+    {q:"Which angel is known for delivering revelations to prophets?", a:["Mikail","Israfil","Jibril","Malik"], c:2},
+    {q:"What is the name of the first house of worship built for humanity, according to Islam?", a:["Al-Aqsa Mosque","The Kaaba","The Prophet's Mosque","Masjid Quba"], c:1},
+    {q:"On the Islamic calendar, what type of calendar is it?", a:["Solar","Lunar","Solar-Lunar hybrid","Fixed 365-day"], c:1},
+    {q:"Which night in Ramadan is considered better than a thousand months?", a:["Laylat al-Qadr","Laylat al-Bara'ah","Isra and Mi'raj night","Eid night"], c:0},
+    {q:"What does the word 'Islam' mean?", a:["Peace only","Submission to God","Prayer","Charity"], c:1},
+    {q:"What are followers of Islam called?", a:["Muslims","Sufis","Imams","Hafiz"], c:0},
+    {q:"Which prophet is associated with building the Kaaba along with his son?", a:["Musa (Moses)","Nuh (Noah)","Ibrahim (Abraham)","Dawud (David)"], c:2},
+    {q:"What is a person who has memorized the entire Quran called?", a:["Qari","Hafiz","Muadhin","Alim"], c:1},
+    {q:"What is the Eid celebrated at the end of Ramadan called?", a:["Eid al-Adha","Eid al-Fitr","Eid Milad","Eid al-Ghadir"], c:1},
+    {q:"Eid al-Adha commemorates the willingness of which prophet to sacrifice his son?", a:["Ibrahim (Abraham)","Yusuf (Joseph)","Yaqub (Jacob)","Ismail (Ishmael)"], c:0},
+    {q:"What is a mosque called in Arabic?", a:["Masjid","Kaaba","Minaret","Sajdah"], c:0},
+    {q:"Which is the shortest chapter (surah) in the Quran by verse count?", a:["Al-Fatiha","Al-Ikhlas","Al-Kawthar","An-Nas"], c:2},
+    {q:"What is voluntary fasting outside Ramadan generally called?", a:["Fard","Sunnah/Nafl fasting","Wajib","Haram"], c:1},
+    {q:"Which of these is one of the Five Pillars of Islam?", a:["Meditation","Fasting in Ramadan","Vegetarianism","Silence retreats"], c:1},
+    {q:"What is the term for the sayings and actions of Prophet Muhammad (PBUH)?", a:["Hadith","Fiqh","Tafsir","Aqidah"], c:0}
+  ];
+
+  var TOTAL_Q = 10;
+  var quiz = [];
+  var current = 0;
+  var answers = [];
+  var selectedIdx = null;
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t=a[i]; a[i]=a[j]; a[j]=t;
+    }
+    return a;
+  }
+
+  function buildQuiz(){
+    var picked = shuffle(BANK).slice(0, TOTAL_Q);
+    quiz = picked.map(function(item){
+      var optIdx = shuffle([0,1,2,3]);
+      var newOptions = optIdx.map(function(i){ return item.a[i]; });
+      var newCorrect = optIdx.indexOf(item.c);
+      return {q:item.q, a:newOptions, c:newCorrect};
+    });
+    current = 0;
+    answers = new Array(quiz.length).fill(null);
+    selectedIdx = null;
+  }
+
+  var progressBar = document.getElementById('progressBar');
+  var qNum = document.getElementById('qNum');
+  var qText = document.getElementById('qText');
+  var optionsEl = document.getElementById('options');
+  var nextBtn = document.getElementById('nextBtn');
+  var skipBtn = document.getElementById('skipBtn');
+  var quizView = document.getElementById('quizView');
+  var resultView = document.getElementById('resultView');
+
+  function renderProgress(){
+    progressBar.innerHTML = '';
+    for(var i=0;i<quiz.length;i++){
+      var el = document.createElement('i');
+      if(i < current || (i===current && selectedIdx!==null)) el.className='done';
+      progressBar.appendChild(el);
+    }
+  }
+
+  function renderQuestion(){
+    selectedIdx = answers[current];
+    var item = quiz[current];
+    qNum.textContent = 'Question ' + (current+1) + ' of ' + quiz.length;
+    qText.textContent = item.q;
+    optionsEl.innerHTML = '';
+    item.a.forEach(function(opt, idx){
+      var b = document.createElement('button');
+      b.type='button';
+      b.className='opt' + (selectedIdx===idx ? ' selected' : '');
+      b.textContent = opt;
+      b.addEventListener('click', function(){
+        selectedIdx = idx;
+        answers[current] = idx;
+        Array.prototype.forEach.call(optionsEl.children, function(c){ c.classList.remove('selected'); });
+        b.classList.add('selected');
+        nextBtn.disabled = false;
+        renderProgress();
+      });
+      optionsEl.appendChild(b);
+    });
+    nextBtn.disabled = selectedIdx===null;
+    nextBtn.textContent = (current === quiz.length-1) ? 'See result' : 'Next';
+    renderProgress();
+  }
+
+  nextBtn.addEventListener('click', function(){
+    if(current < quiz.length-1){
+      current++;
+      renderQuestion();
+    } else {
+      showResults();
+    }
+  });
+
+  skipBtn.addEventListener('click', function(){
+    answers[current] = (selectedIdx!==null) ? selectedIdx : -1;
+    if(current < quiz.length-1){
+      current++;
+      renderQuestion();
+    } else {
+      showResults();
+    }
+  });
+
+  function verdictFor(pct){
+    if(pct === 100) return ["Perfect score", "Mashallah — flawless knowledge of the basics."];
+    if(pct >= 80) return ["Excellent", "You clearly know your Islamic basics well."];
+    if(pct >= 50) return ["Good effort", "A solid attempt — a little more study will sharpen this further."];
+    return ["Keep learning", "A good starting point — revisit the basics and try again."];
+  }
+
+  function showResults(){
+    var correct = 0;
+    var reviewHTML = '';
+    quiz.forEach(function(item, idx){
+      var given = answers[idx];
+      var isCorrect = given === item.c;
+      if(isCorrect) correct++;
+      reviewHTML += '<div class="review-item">' +
+        '<div class="rq">Q'+(idx+1)+'. '+escapeHtml(item.q)+'</div>' +
+        '<div class="ra '+(isCorrect?'ok':'')+'">Your answer: ' + escapeHtml(given>=0 && given!==null ? item.a[given] : 'Skipped') + '</div>' +
+        (isCorrect ? '' : '<div class="rc">Correct: '+escapeHtml(item.a[item.c])+'</div>') +
+        '</div>';
+    });
+
+    var pct = Math.round((correct/quiz.length)*100);
+    document.getElementById('scoreNum').textContent = correct + '/' + quiz.length;
+    document.getElementById('scoreRing').style.setProperty('--pct', pct);
+    var v = verdictFor(pct);
+    document.getElementById('verdictText').textContent = v[0] + ' (' + pct + '%)';
+    document.getElementById('subverdictText').textContent = v[1];
+    document.getElementById('reviewList').innerHTML = reviewHTML;
+
+    var shareText = 'I scored ' + correct + '/' + quiz.length + ' (' + pct + '%) on the Bari Quiz — an Islamic knowledge quiz. Try it yourself:';
+    var pageUrl = window.location.href.split('#')[0];
+    document.getElementById('shareWA').href = 'https://wa.me/?text=' + encodeURIComponent(shareText + ' ' + pageUrl);
+    document.getElementById('shareTG').href = 'https://t.me/share/url?url=' + encodeURIComponent(pageUrl) + '&text=' + encodeURIComponent(shareText);
+    document.getElementById('shareFB').href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(pageUrl);
+    document.getElementById('shareX').href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText) + '&url=' + encodeURIComponent(pageUrl);
+
+    document.getElementById('shareCopy').onclick = function(){
+      var btn = this;
+      var full = shareText + ' ' + pageUrl;
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(full).then(function(){
+          btn.textContent = 'Copied!';
+          setTimeout(function(){ btn.textContent = 'Copy link'; }, 1500);
+        }).catch(function(){ fallbackCopy(full, btn); });
+      } else {
+        fallbackCopy(full, btn);
+      }
+    };
+
+    quizView.classList.add('hidden');
+    resultView.classList.remove('hidden');
+    window.scrollTo(0,0);
+  }
+
+  function fallbackCopy(text, btn){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); btn.textContent='Copied!'; setTimeout(function(){btn.textContent='Copy link';},1500); }catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  function escapeHtml(s){
+    var d = document.createElement('div');
+    d.textContent = s == null ? '' : s;
+    return d.innerHTML;
+  }
+
+  document.getElementById('retakeBtn').addEventListener('click', function(){
+    resultView.classList.add('hidden');
+    quizView.classList.remove('hidden');
+    buildQuiz();
+    renderQuestion();
+  });
+
+  buildQuiz();
+  renderQuestion();
+})();
+</script>
+</body>
+</html>
